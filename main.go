@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/techcorrectco/reqd/commands"
+	"github.com/techcorrectco/reqd/internal/types"
 	"gopkg.in/yaml.v3"
 )
 
@@ -21,7 +22,7 @@ func main() {
 	}
 }
 
-func loadProjectIfExists() *commands.Project {
+func loadProjectIfExists() *types.Project {
 	const filename = "requirements.yaml"
 
 	// Check if requirements.yaml exists
@@ -33,7 +34,7 @@ func loadProjectIfExists() *commands.Project {
 			return nil
 		}
 
-		var project commands.Project
+		var project types.Project
 		if err := yaml.Unmarshal(data, &project); err != nil {
 			fmt.Fprintf(os.Stderr, "Warning: failed to unmarshal %s: %v\n", filename, err)
 			return nil

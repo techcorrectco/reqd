@@ -9,6 +9,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
+	"github.com/techcorrectco/reqd/internal/types"
 	"gopkg.in/yaml.v3"
 )
 
@@ -56,10 +57,10 @@ var InitCmd = &cobra.Command{
 		}
 
 		// Create new project
-		project := &Project{
+		project := &types.Project{
 			Name:         projectName,
 			IDPrefix:     idPrefix,
-			Requirements: []Requirement{},
+			Requirements: []types.Requirement{},
 		}
 
 		// Marshal to YAML
@@ -77,13 +78,6 @@ var InitCmd = &cobra.Command{
 
 		fmt.Printf("'%s' is ready for requirements\n", project.Name)
 	},
-}
-
-// Project represents a collection of requirements for a Product Requirements Document
-type Project struct {
-	Name         string        `yaml:"name"`
-	IDPrefix     string        `yaml:"id_prefix"`
-	Requirements []Requirement `yaml:"requirements,omitempty"`
 }
 
 // generateIDPrefix creates an ID prefix from a project name using acronym generation
@@ -136,11 +130,3 @@ func generateIDPrefix(projectName string) string {
 	return result
 }
 
-// Requirement represents a single requirement in a Product Requirements Document
-type Requirement struct {
-	ID          string        `yaml:"id"`
-	Title       string        `yaml:"title"`
-	Keyword     string        `yaml:"keyword"`
-	Description string        `yaml:"description"`
-	Children    []Requirement `yaml:"children,omitempty"`
-}
