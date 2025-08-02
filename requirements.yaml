@@ -1,2 +1,20 @@
 name: reqd
 id_prefix: REQD
+requirements:
+    - id: "1"
+      title: User authentication system
+      keyword: ""
+      description: ""
+      children:
+        - id: "1.1"
+          title: Login form validation
+          keyword: ""
+          description: ""
+        - id: "1.2"
+          title: Password requirements
+          keyword: ""
+          description: ""
+    - id: "2"
+      title: Data storage layer
+      keyword: ""
+      description: ""

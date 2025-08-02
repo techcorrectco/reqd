@@ -14,4 +14,5 @@ to create, organize, and maintain your requirements effectively.`,
 
 func init() {
 	RootCmd.AddCommand(InitCmd)
+	RootCmd.AddCommand(RequireCmd)
 }
