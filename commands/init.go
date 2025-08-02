@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
 
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
@@ -33,7 +34,7 @@ var InitCmd = &cobra.Command{
 
 		// Initialize with defaults
 		var projectName = defaultName
-		var idPrefix = strings.ToUpper(defaultName)
+		var idPrefix = generateIDPrefix(defaultName)
 
 		// Interactive form
 		form := huh.NewForm(
@@ -83,6 +84,56 @@ type Project struct {
 	Name         string        `yaml:"name"`
 	IDPrefix     string        `yaml:"id_prefix"`
 	Requirements []Requirement `yaml:"requirements,omitempty"`
+}
+
+// generateIDPrefix creates an ID prefix from a project name using acronym generation
+func generateIDPrefix(projectName string) string {
+	// Clean and normalize the input
+	name := strings.TrimSpace(projectName)
+	if name == "" {
+		return ""
+	}
+
+	// Split on common delimiters
+	words := strings.FieldsFunc(name, func(r rune) bool {
+		return r == ' ' || r == '-' || r == '_' || r == '.'
+	})
+
+	// If only one word or no words, use fallback approach
+	if len(words) <= 1 {
+		maxLen := 4
+		if len(name) < maxLen {
+			maxLen = len(name)
+		}
+		return strings.ToUpper(name[:maxLen])
+	}
+
+	// Multiple words: generate acronym
+	var prefix strings.Builder
+
+	for _, word := range words {
+		word = strings.TrimSpace(word)
+		if len(word) > 0 {
+			// Take first character of each word
+			firstChar := rune(word[0])
+			if unicode.IsLetter(firstChar) {
+				prefix.WriteRune(unicode.ToUpper(firstChar))
+			}
+		}
+	}
+
+	result := prefix.String()
+
+	// Fallback: if no letters found in acronym, use first 3-4 chars uppercased
+	if len(result) == 0 {
+		maxLen := 4
+		if len(name) < maxLen {
+			maxLen = len(name)
+		}
+		result = strings.ToUpper(name[:maxLen])
+	}
+
+	return result
 }
 
 // Requirement represents a single requirement in a Product Requirements Document
