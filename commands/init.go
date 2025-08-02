@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -18,20 +20,44 @@ var InitCmd = &cobra.Command{
 
 		// Check if file already exists
 		if _, err := os.Stat(filename); err == nil {
-			fmt.Printf("Error: %s already exists in this directory\n", filename)
-			os.Exit(1)
+			os.Exit(0)
 		}
 
-		// Get current directory name
+		// Get current directory name as default
 		currentDir, err := os.Getwd()
 		if err != nil {
 			fmt.Printf("Error: failed to get current directory: %v\n", err)
 			os.Exit(1)
 		}
+		defaultName := filepath.Base(currentDir)
+
+		// Initialize with defaults
+		var projectName = defaultName
+		var idPrefix = strings.ToUpper(defaultName)
+
+		// Interactive form
+		form := huh.NewForm(
+			huh.NewGroup(
+				huh.NewInput().
+					Title("Project Name").
+					Value(&projectName),
+
+				huh.NewInput().
+					Title("ID Prefix").
+					Value(&idPrefix),
+			),
+		)
+
+		err = form.Run()
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
 
 		// Create new project
 		project := &Project{
-			Name:         filepath.Base(currentDir),
+			Name:         projectName,
+			IDPrefix:     idPrefix,
 			Requirements: []Requirement{},
 		}
 
@@ -48,13 +74,14 @@ var InitCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Printf("Initialized new requirements project '%s' in %s\n", project.Name, filename)
+		fmt.Printf("'%s' is ready for requirements\n", project.Name)
 	},
 }
 
 // Project represents a collection of requirements for a Product Requirements Document
 type Project struct {
 	Name         string        `yaml:"name"`
+	IDPrefix     string        `yaml:"id_prefix"`
 	Requirements []Requirement `yaml:"requirements,omitempty"`
 }
 
