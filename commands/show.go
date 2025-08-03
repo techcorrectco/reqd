@@ -45,14 +45,9 @@ func showRequirements(requirements []types.Requirement, indentLevel int) {
 	}
 }
 
-// showRequirement renders a single requirement and its children with 2-space indentation
+// showRequirement renders a single requirement and its children without indentation
 func showRequirement(req *types.Requirement, indentLevel int) {
-	indent := ""
-	for i := 0; i < indentLevel; i++ {
-		indent += "  "
-	}
-
-	fmt.Printf("%s%s: %s\n", indent, req.ID, req.Title)
+	fmt.Printf("%s: %s\n", req.ID, req.Title)
 
 	if len(req.Children) > 0 {
 		showRequirements(req.Children, indentLevel+1)
