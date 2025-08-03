@@ -49,7 +49,13 @@ var InitCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Printf("'%s' is ready for requirements\n", project.Name)
+		fmt.Println("Created requirements.yaml")
+
+		// Check for OpenAI API key and inform user
+		if os.Getenv("OPENAI_API_KEY") == "" {
+			fmt.Println("\nFor requirement validation, set your OpenAI API key:")
+			fmt.Println("  export OPENAI_API_KEY=\"your-api-key-here\"")
+			fmt.Println("\n--no-validate will be used when adding requirements")
+		}
 	},
 }
-

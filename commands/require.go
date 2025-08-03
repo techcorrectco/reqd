@@ -30,7 +30,8 @@ var RequireCmd = &cobra.Command{
 		}
 
 		var finalTitle string
-		if noValidate {
+		// Auto-skip validation if no API key is set and --no-validate wasn't explicitly used
+		if noValidate || os.Getenv("OPENAI_API_KEY") == "" {
 			// Skip validation, use original title
 			finalTitle = requirementTitle
 		} else {
