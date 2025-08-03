@@ -9,7 +9,6 @@ import (
 // Project represents a collection of requirements for a Product Requirements Document
 type Project struct {
 	Name         string        `yaml:"name"`
-	IDPrefix     string        `yaml:"id_prefix"`
 	Requirements []Requirement `yaml:"requirements,omitempty"`
 }
 

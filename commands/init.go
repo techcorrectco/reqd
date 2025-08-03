@@ -4,10 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
-	"unicode"
 
-	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
 	"github.com/techcorrectco/reqd/internal/types"
 	"gopkg.in/yaml.v3"
@@ -26,41 +23,16 @@ var InitCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		// Get current directory name as default
+		// Get current directory name
 		currentDir, err := os.Getwd()
 		if err != nil {
 			fmt.Printf("Error: failed to get current directory: %v\n", err)
 			os.Exit(1)
 		}
-		defaultName := filepath.Base(currentDir)
-
-		// Initialize with defaults
-		var projectName = defaultName
-		var idPrefix = generateIDPrefix(defaultName)
-
-		// Interactive form
-		form := huh.NewForm(
-			huh.NewGroup(
-				huh.NewInput().
-					Title("Project Name").
-					Value(&projectName),
-
-				huh.NewInput().
-					Title("Requirement ID Prefix").
-					Value(&idPrefix),
-			),
-		).WithTheme(huh.ThemeBase())
-
-		err = form.Run()
-		if err != nil {
-			fmt.Printf("Error: %v\n", err)
-			os.Exit(1)
-		}
 
 		// Create new project
 		project := &types.Project{
-			Name:         projectName,
-			IDPrefix:     idPrefix,
+			Name:         filepath.Base(currentDir),
 			Requirements: []types.Requirement{},
 		}
 
@@ -81,52 +53,3 @@ var InitCmd = &cobra.Command{
 	},
 }
 
-// generateIDPrefix creates an ID prefix from a project name using acronym generation
-func generateIDPrefix(projectName string) string {
-	// Clean and normalize the input
-	name := strings.TrimSpace(projectName)
-	if name == "" {
-		return ""
-	}
-
-	// Split on common delimiters
-	words := strings.FieldsFunc(name, func(r rune) bool {
-		return r == ' ' || r == '-' || r == '_' || r == '.'
-	})
-
-	// If only one word or no words, use fallback approach
-	if len(words) <= 1 {
-		maxLen := 4
-		if len(name) < maxLen {
-			maxLen = len(name)
-		}
-		return strings.ToUpper(name[:maxLen])
-	}
-
-	// Multiple words: generate acronym
-	var prefix strings.Builder
-
-	for _, word := range words {
-		word = strings.TrimSpace(word)
-		if len(word) > 0 {
-			// Take first character of each word
-			firstChar := rune(word[0])
-			if unicode.IsLetter(firstChar) {
-				prefix.WriteRune(unicode.ToUpper(firstChar))
-			}
-		}
-	}
-
-	result := prefix.String()
-
-	// Fallback: if no letters found in acronym, use first 3-4 chars uppercased
-	if len(result) == 0 {
-		maxLen := 4
-		if len(name) < maxLen {
-			maxLen = len(name)
-		}
-		result = strings.ToUpper(name[:maxLen])
-	}
-
-	return result
-}
