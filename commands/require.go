@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/charmbracelet/huh"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
+	"github.com/techcorrectco/reqd/internal/openai"
 	"github.com/techcorrectco/reqd/internal/types"
 )
 
@@ -17,6 +20,7 @@ var RequireCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		requirementTitle := args[0]
 		parentID, _ := cmd.Flags().GetString("parent")
+		noValidate, _ := cmd.Flags().GetBool("no-validate")
 
 		// Load existing project
 		project, err := types.LoadProject()
@@ -25,8 +29,22 @@ var RequireCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		var finalTitle string
+		if noValidate {
+			// Skip validation, use original title
+			finalTitle = requirementTitle
+		} else {
+			// Validate requirement with OpenAI
+			finalTitle, err = validateRequirement(requirementTitle)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: %v\n", err)
+				fmt.Fprintf(os.Stderr, "Proceeding with original requirement...\n")
+				finalTitle = requirementTitle
+			}
+		}
+
 		// Generate new requirement
-		newReq := createRequirement(requirementTitle, parentID, project)
+		newReq := createRequirement(finalTitle, parentID, project)
 
 		// Add requirement to project
 		if parentID == "" {
@@ -52,6 +70,7 @@ var RequireCmd = &cobra.Command{
 
 func init() {
 	RequireCmd.Flags().StringP("parent", "p", "", "Parent requirement ID")
+	RequireCmd.Flags().BoolP("no-validate", "n", false, "Skip OpenAI validation of the requirement")
 }
 
 // createRequirement generates a new requirement with proper ID
@@ -108,4 +127,48 @@ func addChildRequirement(requirements []types.Requirement, parentID string, chil
 		}
 	}
 	return false
+}
+
+// validateRequirement validates a requirement using OpenAI and returns the final title to use
+func validateRequirement(input string) (string, error) {
+	fmt.Println("Reviewing...")
+
+	validation, err := openai.ValidateRequirement(input)
+	if err != nil {
+		return "", err
+	}
+
+	// Display validation results
+	fmt.Printf("\nInput:\n%s\n\n", input)
+
+	if len(validation.Problems) > 0 {
+		fmt.Println("Issues:")
+		for _, problem := range validation.Problems {
+			fmt.Printf("- %s\n", problem)
+		}
+		fmt.Println()
+	}
+
+	fmt.Printf("Recommended:\n%s\n\n", validation.Recommended)
+
+	// Ask user if they want to accept recommended changes
+	acceptRecommended := true
+	err = huh.NewConfirm().
+		WithButtonAlignment(lipgloss.Left).
+		Title("Accept recommended changes?").
+		Affirmative("Yes").
+		Negative("No").
+		Value(&acceptRecommended).
+		WithTheme(huh.ThemeBase()).
+		Run()
+
+	if err != nil {
+		return "", fmt.Errorf("failed to get user confirmation: %w", err)
+	}
+
+	if acceptRecommended {
+		return validation.Recommended, nil
+	}
+
+	return input, nil
 }
