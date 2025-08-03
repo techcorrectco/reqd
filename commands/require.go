@@ -65,7 +65,7 @@ var RequireCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Printf("\n%s: %s\n", newReq.ID, newReq.Title)
+		fmt.Printf("\n%s: %s\n", newReq.ID, newReq.Text)
 	},
 }
 
@@ -93,11 +93,9 @@ func createRequirement(title, parentID string, project *types.Project) types.Req
 	}
 
 	return types.Requirement{
-		ID:          id,
-		Title:       title,
-		Keyword:     "", // Could be extracted from title or left empty
-		Description: "", // Could be added later
-		Children:    []types.Requirement{},
+		ID:       id,
+		Text:     title,
+		Children: []types.Requirement{},
 	}
 }
 

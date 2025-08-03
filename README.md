@@ -91,14 +91,10 @@ The tool creates and manages a `requirements.yaml` file with the following struc
 name: Your Project Name
 requirements:
   - id: "1"
-    title: "Main requirement"
-    keyword: "keyword"
-    description: "Detailed description"
+    text: "Main requirement"
     children:
       - id: "1.1"
-        title: "Sub-requirement"
-        keyword: ""
-        description: ""
+        text: "Sub-requirement"
 ```
 
 ## Commands

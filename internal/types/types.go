@@ -43,9 +43,7 @@ func (p *Project) Save() error {
 
 // Requirement represents a single requirement in a Product Requirements Document
 type Requirement struct {
-	ID          string        `yaml:"id"`
-	Title       string        `yaml:"title"`
-	Keyword     string        `yaml:"keyword"`
-	Description string        `yaml:"description"`
-	Children    []Requirement `yaml:"children,omitempty"`
+	ID       string        `yaml:"id"`
+	Text     string        `yaml:"text"`
+	Children []Requirement `yaml:"children,omitempty"`
 }
