@@ -31,8 +31,8 @@ reqd require "Your requirement text"
 reqd r "Your requirement text"
 ```
 
-**AI-Powered Validation:**
-By default, requirements are validated using OpenAI's GPT-4o model to ensure they follow best practices (RFC 2119 keywords, clear language, etc.). 
+**Automatic Validation:**
+When `OPENAI_API_KEY` is set, requirements are automatically validated using OpenAI's GPT-4o model to ensure they follow best practices (RFC 2119 keywords, clear language, etc.). Without an API key, validation is automatically skipped.
 
 **Setup OPENAI_API_KEY:**
 ```bash
@@ -41,17 +41,17 @@ export OPENAI_API_KEY="your-api-key-here"
 
 **Flags:**
 - `--parent` or `-p`: Specify parent requirement ID for nested requirements
-- `--no-validate` or `-n`: Skip AI validation and add requirement as-is
+- `--no-validate` or `-n`: Skip validation even when API key is configured
 
 **Examples:**
 ```bash
-# Basic requirement with validation
+# Basic requirement (validates automatically if API key is set)
 reqd require "User must be able to login"
 
 # Child requirement
 reqd require "Login form must validate email format" --parent 1.1
 
-# Skip validation
+# Force skip validation even with API key
 reqd require "Quick requirement" --no-validate
 ```
 
