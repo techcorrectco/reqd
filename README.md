@@ -57,7 +57,7 @@ reqd require "Quick requirement" --no-validate
 
 ### Browse requirements
 
-View and navigate your requirements interactively:
+Display your requirements in a flat list format:
 
 ```bash
 reqd show
@@ -65,23 +65,14 @@ reqd show
 reqd s
 ```
 
-**Navigation features:**
-- Select requirements with arrow keys and Enter
-- Use `..` option to navigate back to parent requirements
-- Requirements with children are marked with `+` and show their children when selected
-- Requirements without children show Edit/Quit options
+This displays all requirements where hierarchy is indicated by dot-notation IDs (1, 1.1, 1.1.1).
 
-**Editing:**
-- Select "Edit" to modify a requirement's title inline
-- Changes are saved automatically to `requirements.yaml`
-
-### View specific requirement children
-
-Start browsing from a specific requirement:
-
+**View specific requirement:**
 ```bash
 reqd show <requirement_id>
 ```
+
+Shows the specified requirement and all its children in the same flat format.
 
 ## File Structure
 
@@ -102,5 +93,5 @@ requirements:
 | Command | Alias | Description |
 |---------|--------|-------------|
 | `init` | `i` | Initialize a new requirements project |
-| `require` | `r` | Add a new requirement interactively |
-| `show` | `s` | Browse requirements with interactive navigation |
+| `require [text]` | `r` | Add a new requirement with optional validation |
+| `show [id]` | `s` | Display requirements in flat list format |
