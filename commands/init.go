@@ -45,10 +45,10 @@ var InitCmd = &cobra.Command{
 					Value(&projectName),
 
 				huh.NewInput().
-					Title("ID Prefix").
+					Title("Requirement ID Prefix").
 					Value(&idPrefix),
 			),
-		)
+		).WithTheme(huh.ThemeBase())
 
 		err = form.Run()
 		if err != nil {
@@ -129,4 +129,3 @@ func generateIDPrefix(projectName string) string {
 
 	return result
 }
-
