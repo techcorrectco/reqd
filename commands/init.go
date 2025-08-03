@@ -14,9 +14,10 @@ import (
 )
 
 var InitCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Initialize a new requirements project",
-	Long:  `Initialize a new requirements project by creating a requirements.yaml file in the current directory.`,
+	Use:     "init",
+	Aliases: []string{"i"},
+	Short:   "Initialize a new requirements project",
+	Long:    `Initialize a new requirements project by creating a requirements.yaml file in the current directory.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		const filename = "requirements.yaml"
 

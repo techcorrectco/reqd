@@ -9,10 +9,11 @@ import (
 )
 
 var RequireCmd = &cobra.Command{
-	Use:   "require [requirement title]",
-	Short: "Document a new system requirement",
-	Long:  `Add a new requirement to the project. Generates an ID and adds it to the requirements hierarchy.`,
-	Args:  cobra.ExactArgs(1),
+	Use:     "require [requirement title]",
+	Aliases: []string{"r"},
+	Short:   "Document a new system requirement",
+	Long:    `Add a new requirement to the project. Generates an ID and adds it to the requirements hierarchy.`,
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		requirementTitle := args[0]
 		parentID, _ := cmd.Flags().GetString("parent")
