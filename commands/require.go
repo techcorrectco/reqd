@@ -64,7 +64,7 @@ var RequireCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Printf("Added requirement %s: %s\n", newReq.ID, newReq.Title)
+		fmt.Printf("\n%s: %s\n", newReq.ID, newReq.Title)
 	},
 }
 
