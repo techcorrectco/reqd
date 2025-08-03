@@ -26,12 +26,34 @@ This creates a `requirements.yaml` file with your project structure.
 Add new requirements to your project:
 
 ```bash
-reqd require
+reqd require "Your requirement text"
 # or
-reqd r
+reqd r "Your requirement text"
 ```
 
-This opens an interactive form to add requirements with ID, title, keyword, and description.
+**AI-Powered Validation:**
+By default, requirements are validated using OpenAI's GPT-4o model to ensure they follow best practices (RFC 2119 keywords, clear language, etc.). 
+
+**Setup OPENAI_API_KEY:**
+```bash
+export OPENAI_API_KEY="your-api-key-here"
+```
+
+**Flags:**
+- `--parent` or `-p`: Specify parent requirement ID for nested requirements
+- `--no-validate` or `-n`: Skip AI validation and add requirement as-is
+
+**Examples:**
+```bash
+# Basic requirement with validation
+reqd require "User must be able to login"
+
+# Child requirement
+reqd require "Login form must validate email format" --parent 1.1
+
+# Skip validation
+reqd require "Quick requirement" --no-validate
+```
 
 ### Browse requirements
 
