@@ -1,2 +1,88 @@
 # reqd
 Manage the complexity of your Product Requirements Document (PRD)
+
+## Installation
+
+```bash
+go build
+```
+
+## Usage
+
+### Initialize a new project
+
+Create a new requirements project in the current directory:
+
+```bash
+reqd init
+# or
+reqd i
+```
+
+This creates a `requirements.yaml` file with your project structure.
+
+### Add requirements
+
+Add new requirements to your project:
+
+```bash
+reqd require
+# or
+reqd r
+```
+
+This opens an interactive form to add requirements with ID, title, keyword, and description.
+
+### Browse requirements
+
+View and navigate your requirements interactively:
+
+```bash
+reqd show
+# or
+reqd s
+```
+
+**Navigation features:**
+- Select requirements with arrow keys and Enter
+- Use `..` option to navigate back to parent requirements
+- Requirements with children are marked with `+` and show their children when selected
+- Requirements without children show Edit/Quit options
+
+**Editing:**
+- Select "Edit" to modify a requirement's title inline
+- Changes are saved automatically to `requirements.yaml`
+
+### View specific requirement children
+
+Start browsing from a specific requirement:
+
+```bash
+reqd show <requirement_id>
+```
+
+## File Structure
+
+The tool creates and manages a `requirements.yaml` file with the following structure:
+
+```yaml
+name: Your Project Name
+requirements:
+  - id: "1"
+    title: "Main requirement"
+    keyword: "keyword"
+    description: "Detailed description"
+    children:
+      - id: "1.1"
+        title: "Sub-requirement"
+        keyword: ""
+        description: ""
+```
+
+## Commands
+
+| Command | Alias | Description |
+|---------|--------|-------------|
+| `init` | `i` | Initialize a new requirements project |
+| `require` | `r` | Add a new requirement interactively |
+| `show` | `s` | Browse requirements with interactive navigation |
