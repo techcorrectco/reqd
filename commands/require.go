@@ -1,11 +1,11 @@
 package commands
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
-	"github.com/charmbracelet/huh"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 	"github.com/techcorrectco/reqd/internal/openai"
 	"github.com/techcorrectco/reqd/internal/types"
@@ -152,21 +152,17 @@ func validateRequirement(input string) (string, error) {
 	fmt.Printf("Recommended:\n%s\n\n", validation.Recommended)
 
 	// Ask user if they want to accept recommended changes
-	acceptRecommended := true
-	err = huh.NewConfirm().
-		WithButtonAlignment(lipgloss.Left).
-		Title("Accept recommended changes?").
-		Affirmative("Yes").
-		Negative("No").
-		Value(&acceptRecommended).
-		WithTheme(huh.ThemeBase()).
-		Run()
-
+	fmt.Print("Accept recommended changes? [Y/n]: ")
+	reader := bufio.NewReader(os.Stdin)
+	response, err := reader.ReadString('\n')
 	if err != nil {
-		return "", fmt.Errorf("failed to get user confirmation: %w", err)
+		return "", fmt.Errorf("failed to read user input: %w", err)
 	}
 
-	if acceptRecommended {
+	response = strings.TrimSpace(strings.ToLower(response))
+	
+	// Default to "yes" if empty response or "y"
+	if response == "" || response == "y" || response == "yes" {
 		return validation.Recommended, nil
 	}
 
