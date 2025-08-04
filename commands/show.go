@@ -25,31 +25,31 @@ var ShowCmd = &cobra.Command{
 		if len(args) > 0 {
 			// Show specific requirement and its children
 			requirementID := args[0]
-			requirement := findRequirement(project.Requirements, requirementID)
+			requirement := project.FindRequirement(requirementID)
 			if requirement == nil {
 				fmt.Fprintf(os.Stderr, "Error: Requirement '%s' not found\n", requirementID)
 				os.Exit(1)
 			}
-			showRequirement(requirement, 0)
+			showRequirement(requirement)
 		} else {
 			// Show entire list of requirements
-			showRequirements(project.Requirements, 0)
+			showRequirements(project.Requirements)
 		}
 	},
 }
 
-// showRequirements renders a list of requirements with 2-space indentation
-func showRequirements(requirements []types.Requirement, indentLevel int) {
+// showRequirements renders a list of requirements
+func showRequirements(requirements []types.Requirement) {
 	for _, req := range requirements {
-		showRequirement(&req, indentLevel)
+		showRequirement(&req)
 	}
 }
 
-// showRequirement renders a single requirement and its children without indentation
-func showRequirement(req *types.Requirement, indentLevel int) {
+// showRequirement renders a single requirement and its children
+func showRequirement(req *types.Requirement) {
 	fmt.Printf("%s: %s\n", req.ID, req.Text)
 
 	if len(req.Children) > 0 {
-		showRequirements(req.Children, indentLevel+1)
+		showRequirements(req.Children)
 	}
 }

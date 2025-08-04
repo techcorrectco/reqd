@@ -16,7 +16,6 @@ type ValidationResponse struct {
 	Input       string   `json:"input"`
 	Problems    []string `json:"problems"`
 	Recommended string   `json:"recommended"`
-	Keyword     string   `json:"keyword"`
 }
 
 type OpenAIRequest struct {

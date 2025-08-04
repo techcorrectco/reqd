@@ -83,7 +83,7 @@ func createRequirement(title, parentID string, project *types.Project) types.Req
 		id = fmt.Sprintf("%d", len(project.Requirements)+1)
 	} else {
 		// Child requirement: find parent and generate child ID
-		parent := findRequirement(project.Requirements, parentID)
+		parent := project.FindRequirement(parentID)
 		if parent != nil {
 			id = fmt.Sprintf("%s.%d", parentID, len(parent.Children)+1)
 		} else {
@@ -97,20 +97,6 @@ func createRequirement(title, parentID string, project *types.Project) types.Req
 		Text:     title,
 		Children: []types.Requirement{},
 	}
-}
-
-// findRequirement recursively searches for a requirement by ID
-func findRequirement(requirements []types.Requirement, id string) *types.Requirement {
-	for i := range requirements {
-		req := requirements[i]
-		if req.ID == id {
-			return &requirements[i]
-		}
-		if found := findRequirement(req.Children, id); found != nil {
-			return found
-		}
-	}
-	return nil
 }
 
 // addChildRequirement finds the parent and adds the child requirement
@@ -159,7 +145,7 @@ func validateRequirement(input string) (string, error) {
 	}
 
 	response = strings.TrimSpace(strings.ToLower(response))
-	
+
 	// Default to "yes" if empty response or "y"
 	if response == "" || response == "y" || response == "yes" {
 		return validation.Recommended, nil

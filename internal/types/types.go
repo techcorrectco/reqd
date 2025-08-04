@@ -47,3 +47,22 @@ type Requirement struct {
 	Text     string        `yaml:"text"`
 	Children []Requirement `yaml:"children,omitempty"`
 }
+
+// FindRequirement finds a requirement by ID in the project's requirement tree
+func (p *Project) FindRequirement(id string) *Requirement {
+	return findRequirement(p.Requirements, id)
+}
+
+// findRequirement recursively searches for a requirement by ID
+func findRequirement(requirements []Requirement, id string) *Requirement {
+	for i := range requirements {
+		req := requirements[i]
+		if req.ID == id {
+			return &requirements[i]
+		}
+		if found := findRequirement(req.Children, id); found != nil {
+			return found
+		}
+	}
+	return nil
+}
