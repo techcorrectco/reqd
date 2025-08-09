@@ -34,6 +34,9 @@ reqd r "Your requirement text"
 **Automatic Validation:**
 When `OPENAI_API_KEY` is set, requirements are automatically validated using OpenAI's GPT-4o model to ensure they follow best practices (RFC 2119 keywords, clear language, etc.). Without an API key, validation is automatically skipped.
 
+**Parent Proposal:**
+When no parent is specified and `OPENAI_API_KEY` is available, the system can suggest an appropriate parent requirement from existing branch requirements (requirements that have children). This helps maintain a well-organized requirement hierarchy.
+
 **Setup OPENAI_API_KEY:**
 ```bash
 export OPENAI_API_KEY="your-api-key-here"
@@ -41,18 +44,22 @@ export OPENAI_API_KEY="your-api-key-here"
 
 **Flags:**
 - `--parent` or `-p`: Specify parent requirement ID for nested requirements
-- `--no-validate` or `-n`: Skip validation even when API key is configured
+- `--no-validate` or `-V`: Skip validation even when API key is configured
+- `--no-parent-proposal` or `-P`: Skip parent proposal feature
 
 **Examples:**
 ```bash
-# Basic requirement (validates automatically if API key is set)
+# Basic requirement (validates automatically and may propose parent if API key is set)
 reqd require "User must be able to login"
 
-# Child requirement
+# Child requirement with explicit parent
 reqd require "Login form must validate email format" --parent 1.1
 
-# Force skip validation even with API key
-reqd require "Quick requirement" --no-validate
+# Skip validation and parent proposal
+reqd require "Quick requirement" --no-validate --no-parent-proposal
+
+# Skip only parent proposal (still validates if API key available)
+reqd require "Another requirement" --no-parent-proposal
 ```
 
 ### Browse requirements
