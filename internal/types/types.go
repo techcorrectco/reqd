@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -46,6 +47,11 @@ type Requirement struct {
 	ID       string        `yaml:"id"`
 	Text     string        `yaml:"text"`
 	Children []Requirement `yaml:"children,omitempty"`
+}
+
+// DisplayFormat returns the requirement in format "<id>: <text>"
+func (r *Requirement) DisplayFormat() string {
+	return fmt.Sprintf("%s: %s", r.ID, r.Text)
 }
 
 // FindRequirement finds a requirement by ID in the project's requirement tree

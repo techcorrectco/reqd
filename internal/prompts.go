@@ -45,4 +45,32 @@ Here is the requirement statement to analyze:
 
 "{{.Input}}"
 `
+
+	ProposeParentPrompt = `
+You are an AI Requirements Hierarchy Assistant.
+
+Your task is to analyze a new requirement that does not currently have a parent and determine the most appropriate parent requirement from a provided list.
+
+Each candidate parent is represented in the format:
+<id>: <requirement text>
+
+Choose the best-fitting parent based on meaning, functional grouping, and logical relevance.
+
+Return only a JSON object with the 'proposed_parent' set to the selected parent's ID.
+If no appropriate parent exists, return '"proposed_parent": null'.
+
+---
+
+Return the proposed parent ID strictly as a structured JSON object matching this schema:
+{
+  "proposed_parent": "<ID of selected parent OR null>"
+}
+
+Here is the list of possible parents:
+"{{.Parents}}"
+
+
+Here is the requirement statement to analyze:
+"{{.Requirement}}"
+`
 )

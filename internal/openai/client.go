@@ -10,12 +10,17 @@ import (
 	"text/template"
 
 	"github.com/techcorrectco/reqd/internal"
+	"github.com/techcorrectco/reqd/internal/types"
 )
 
 type ValidationResponse struct {
 	Input       string   `json:"input"`
 	Problems    []string `json:"problems"`
 	Recommended string   `json:"recommended"`
+}
+
+type ParentProposalResponse struct {
+	ProposedParent *string `json:"proposed_parent"`
 }
 
 type OpenAIRequest struct {
@@ -38,23 +43,27 @@ type Choice struct {
 	Message Message `json:"message"`
 }
 
-func ValidateRequirement(input string) (*ValidationResponse, error) {
+// renderTemplate renders a template string with provided data
+func renderTemplate(templateStr string, data map[string]string) (string, error) {
+	tmpl, err := template.New("prompt").Parse(templateStr)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse prompt template: %w", err)
+	}
+
+	var buffer bytes.Buffer
+	err = tmpl.Execute(&buffer, data)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute prompt template: %w", err)
+	}
+
+	return buffer.String(), nil
+}
+
+// makeOpenAIRequest sends a request to OpenAI and returns the response content
+func makeOpenAIRequest(prompt string) (string, error) {
 	apiKey := os.Getenv("OPENAI_API_KEY")
 	if apiKey == "" {
-		return nil, fmt.Errorf("OPENAI_API_KEY environment variable not set - use --no-validate to skip validation")
-	}
-
-	// Parse the prompt template
-	tmpl, err := template.New("prompt").Parse(internal.ValidateRequirementPrompt)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse prompt template: %w", err)
-	}
-
-	// Execute template with input
-	var promptBuffer bytes.Buffer
-	err = tmpl.Execute(&promptBuffer, map[string]string{"Input": input})
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute prompt template: %w", err)
+		return "", fmt.Errorf("OPENAI_API_KEY environment variable not set")
 	}
 
 	// Create OpenAI request
@@ -63,7 +72,7 @@ func ValidateRequirement(input string) (*ValidationResponse, error) {
 		Messages: []Message{
 			{
 				Role:    "user",
-				Content: promptBuffer.String(),
+				Content: prompt,
 			},
 		},
 		ResponseFormat: map[string]string{
@@ -74,13 +83,13 @@ func ValidateRequirement(input string) (*ValidationResponse, error) {
 
 	jsonData, err := json.Marshal(reqBody)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request: %w", err)
+		return "", fmt.Errorf("failed to marshal request: %w", err)
 	}
 
 	// Make HTTP request
 	req, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(jsonData))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -89,31 +98,77 @@ func ValidateRequirement(input string) (*ValidationResponse, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to make request: %w", err)
+		return "", fmt.Errorf("failed to make request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("OpenAI API error (status %d): %s", resp.StatusCode, string(body))
+		return "", fmt.Errorf("OpenAI API error (status %d): %s", resp.StatusCode, string(body))
 	}
 
 	// Parse OpenAI response
 	var openaiResp OpenAIResponse
 	if err := json.NewDecoder(resp.Body).Decode(&openaiResp); err != nil {
-		return nil, fmt.Errorf("failed to decode OpenAI response: %w", err)
+		return "", fmt.Errorf("failed to decode OpenAI response: %w", err)
 	}
 
 	if len(openaiResp.Choices) == 0 {
-		return nil, fmt.Errorf("no choices in OpenAI response")
+		return "", fmt.Errorf("no choices in OpenAI response")
+	}
+
+	return openaiResp.Choices[0].Message.Content, nil
+}
+
+func ValidateRequirement(input string) (*ValidationResponse, error) {
+	// Render template
+	prompt, err := renderTemplate(internal.ValidateRequirementPrompt, map[string]string{"Input": input})
+	if err != nil {
+		return nil, err
+	}
+
+	// Make OpenAI request
+	responseContent, err := makeOpenAIRequest(prompt)
+	if err != nil {
+		return nil, err
 	}
 
 	// Parse the JSON content from OpenAI
-	responseContent := openaiResp.Choices[0].Message.Content
 	var validationResp ValidationResponse
 	if err := json.Unmarshal([]byte(responseContent), &validationResp); err != nil {
 		return nil, fmt.Errorf("failed to parse validation response JSON: %w", err)
 	}
 
 	return &validationResp, nil
+}
+
+func ProposeParent(requirement string, branches []types.Requirement) (*ParentProposalResponse, error) {
+	// Format branches using DisplayFormat method
+	var parentsText string
+	for _, branch := range branches {
+		parentsText += branch.DisplayFormat() + "\n"
+	}
+
+	// Render template
+	prompt, err := renderTemplate(internal.ProposeParentPrompt, map[string]string{
+		"Parents":     parentsText,
+		"Requirement": requirement,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Make OpenAI request
+	responseContent, err := makeOpenAIRequest(prompt)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse the JSON content from OpenAI
+	var proposalResp ParentProposalResponse
+	if err := json.Unmarshal([]byte(responseContent), &proposalResp); err != nil {
+		return nil, fmt.Errorf("failed to parse parent proposal response JSON: %w", err)
+	}
+
+	return &proposalResp, nil
 }
