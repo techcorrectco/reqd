@@ -66,3 +66,20 @@ func findRequirement(requirements []Requirement, id string) *Requirement {
 	}
 	return nil
 }
+
+// GetBranches returns only the requirements that have children (branches, not leaves)
+func (p *Project) GetBranches() []Requirement {
+	return getBranches(p.Requirements)
+}
+
+// getBranches recursively collects requirements that have children
+func getBranches(requirements []Requirement) []Requirement {
+	var branches []Requirement
+	for _, req := range requirements {
+		if len(req.Children) > 0 {
+			branches = append(branches, req)
+			branches = append(branches, getBranches(req.Children)...)
+		}
+	}
+	return branches
+}
